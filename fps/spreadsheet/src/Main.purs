@@ -4,10 +4,7 @@ import Data.Maybe
 import Prelude
 
 import Control.Monad.State (class MonadState)
-import Data.Array (concat, concatMap, zip)
 import Data.Number (fromString)
-import Data.List as L
-import Data.Tuple as T
 import Effect (Effect)
 import Halogen as H
 import Halogen.Aff as HA
@@ -15,7 +12,9 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
-import Matrix (Matrix(..), height, isEmpty, repeat, rows, toIndexedArray, width, modify, empty, get) as M
+import Matrix (isEmpty, repeat, toIndexedArray, modify, get) as M
+import Sheet (CellState(..), Sheet, getSheet)
+import Primitives (Val(..))
 
 
 main :: Effect Unit
@@ -23,18 +22,7 @@ main = HA.runHalogenAff do
   body <- HA.awaitBody
   runUI component unit body
 
-newtype Row = Row Int
-newtype Cell = Cell Int
 
-type CellLocation = T.Tuple Row Cell
-
-type Sheet a = {
-    name :: String
-    , rows :: Int
-    , cols :: Int
-    , cellState :: CellState a
-    , selectedCell :: CellLocation
-  }
 --instance Show (Sheet Val) where
 --  show ({ name: sheetName, rows: numRows, cols: numCols, cellState: cellS }) =
 --    "(Sheet name:"
@@ -53,14 +41,6 @@ myRec = {
   , age: 28
   }
 
-getSheet :: forall a. Sheet a
-getSheet =
-  { name: ""
-  , rows: 0
-  , cols: 0
-  , cellState: CellState (M.empty :: M.Matrix a)
-  , selectedCell: T.Tuple (Row 0) (Cell 0)
-  }
 
 type State = { activeSheet :: Sheet Val
   }
@@ -72,17 +52,6 @@ getState = { activeSheet: (getSheet :: Sheet Val)
   }
 
 data Action = SetText String Int Int
-
-data CellState a = CellState (M.Matrix a)
-instance Show (CellState Val) where
-  show (CellState (mtx))
-    | M.isEmpty mtx = "(Empty Cell Matrix)"
-    | otherwise = "(Cell Matrix of size " <> show (M.width mtx) <> "x" <> show (M.height mtx) <> ")"
-
-data Val = Numeric Number | Letters String
-
-instance Show (CellState String) where
-  show (CellState cs) = "(h:" <> show (M.height cs) <> ", w:" <> show (M.width cs) <> ")"
 
 matrixSize = 5 :: Int
 
