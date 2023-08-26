@@ -60,7 +60,6 @@ getSheet =
   , cols: 0
   , cellState: CellState (M.empty :: M.Matrix a)
   , selectedCell: T.Tuple (Row 0) (Cell 0)
-  --, cellState: CellState (M.empty :: M.Matrix a)
   }
 
 type State = { activeSheet :: Sheet Val
@@ -106,17 +105,12 @@ render state =
         ]
     ]
 
---{getCellState $ M.repeat matrixSize matrixSize "text"
-
 component =
   H.mkComponent
     { initialState
     , render
     , eval: H.mkEval $ H.defaultEval { handleAction = handleAction }
     }
-  --handleAction = case _ of
-  --  Increment -> H.modify_ \state -> state + 2
-  --  Decrement -> H.modify_ \state -> state - 1
 
 -- w -> "widget", describes what components can be used in the html
 -- i -> "input", the type used to handle DOM events
@@ -167,21 +161,4 @@ handleAction action = case action of
             Just newMatrix -> oldState { activeSheet { cellState=CellState newMatrix } }
             Nothing -> oldState
         Nothing -> oldState
-      --case M.modify row col (\_ -> Letters newText) matrix of
-      --  -- how do I do the record syntax update to update just the cell matrix
-      --  -- oldState { activeSheet { cellState = (CellState newMatrix) } }
-      --  Just newMatrix ->
-      --    let
-      --      newCellState = CellState newMatrix :: CellState Val
-      --      newSheet = oldSheet :: Sheet Val
-      --    in
-      --      oldState { activeSheet { cellState=newCellState } }
-      --    --oldState {
-      --    --  activeSheet=(oldSheet :: Sheet Val)
-      --    --  }
-      --  -- TODO if the indices into the matrix were out of bounds, the modify function
-      --  -- will return nothing. this should never happen because I check the bounds
-      --  -- I need to break the habit of coercing w/fromJust when I think the program should crash
-      --  -- because of a programmer mistake
-      --  Nothing -> oldState
         )
