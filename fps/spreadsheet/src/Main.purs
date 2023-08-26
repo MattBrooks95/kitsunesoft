@@ -5,6 +5,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState)
 import Data.Array (concat, concatMap, zip)
+import Data.Number (fromString)
 import Data.List as L
 import Data.Tuple as T
 import Effect (Effect)
@@ -14,7 +15,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
-import Matrix (Matrix(..), height, isEmpty, repeat, rows, toIndexedArray, width, modify, empty) as M
+import Matrix (Matrix(..), height, isEmpty, repeat, rows, toIndexedArray, width, modify, empty, get) as M
 
 
 main :: Effect Unit
@@ -119,7 +120,7 @@ component =
 
 -- w -> "widget", describes what components can be used in the html
 -- i -> "input", the type used to handle DOM events
-renderState :: forall w i. CellState Val -> HH.HTML w i
+--renderState :: forall w i. CellState Val -> HH.HTML w i
 renderState (CellState matrix) =
   HH.div
     [
@@ -132,7 +133,6 @@ renderState (CellState matrix) =
       ]
     )
 
-renderInput :: forall w i. Val -> Int -> Int -> HH.HTML w i
 renderInput value row col =
   let valAsString =
         case value of
@@ -142,10 +142,10 @@ renderInput value row col =
   --HH.span_ [ HH.text text]
   HH.input
     [ HP.value valAsString
-    --, HE.onValueInput (\str -> SetText str row col)
+    , HE.onValueInput (\str -> SetText str row col)
     ]
 
-renderInputs :: forall w i. M.Matrix Val -> Array (HH.HTML w i)
+--renderInputs :: forall w i. M.Matrix Val -> Array (HH.HTML w i)
 renderInputs m
   | M.isEmpty m = []
   | otherwise =
@@ -157,21 +157,31 @@ handleAction :: forall m98. MonadState State m98 => Action -> m98 Unit
 handleAction action = case action of
   SetText newText row col ->
     H.modify_ (\oldState@(stRecord@{ activeSheet: oldSheet@({cellState: (CellState matrix) })}) ->
-      case M.modify row col (\_ -> Letters newText) matrix of
-        -- how do I do the record syntax update to update just the cell matrix
-        -- oldState { activeSheet { cellState = (CellState newMatrix) } }
-        Just newMatrix ->
-          let
-            newCellState = CellState newMatrix :: CellState Val
-            newSheet = oldSheet :: Sheet Val
-          in
-            oldState { activeSheet { cellState=newCellState } }
-          --oldState {
-          --  activeSheet=(oldSheet :: Sheet Val)
-          --  }
-        -- TODO if the indices into the matrix were out of bounds, the modify function
-        -- will return nothing. this should never happen because I check the bounds
-        -- I need to break the habit of coercing w/fromJust when I think the program should crash
-        -- because of a programmer mistake
+      case M.get row col matrix of
+        Just (Letters _) -> case M.modify row col (\_ -> Letters newText) matrix of
+          Nothing -> oldState
+          Just newMatrix -> oldState { activeSheet { cellState=CellState newMatrix } }
+        Just (Numeric _) -> case fromString newText of
+          Nothing -> oldState
+          Just asNumber -> case M.modify row col (\_ -> Numeric asNumber) matrix of
+            Just newMatrix -> oldState { activeSheet { cellState=CellState newMatrix } }
+            Nothing -> oldState
         Nothing -> oldState
+      --case M.modify row col (\_ -> Letters newText) matrix of
+      --  -- how do I do the record syntax update to update just the cell matrix
+      --  -- oldState { activeSheet { cellState = (CellState newMatrix) } }
+      --  Just newMatrix ->
+      --    let
+      --      newCellState = CellState newMatrix :: CellState Val
+      --      newSheet = oldSheet :: Sheet Val
+      --    in
+      --      oldState { activeSheet { cellState=newCellState } }
+      --    --oldState {
+      --    --  activeSheet=(oldSheet :: Sheet Val)
+      --    --  }
+      --  -- TODO if the indices into the matrix were out of bounds, the modify function
+      --  -- will return nothing. this should never happen because I check the bounds
+      --  -- I need to break the habit of coercing w/fromJust when I think the program should crash
+      --  -- because of a programmer mistake
+      --  Nothing -> oldState
         )
