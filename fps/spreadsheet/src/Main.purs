@@ -149,16 +149,30 @@ renderInputs m
 
 handleAction :: forall m98. MonadState State m98 => Action -> m98 Unit
 handleAction action = case action of
-  SetText newText row col ->
-    H.modify_ (\oldState@(stRecord@{ activeSheet: oldSheet@({cellState: (CellState matrix) })}) ->
-      case M.get row col matrix of
-        Just (Letters _) -> case M.modify row col (\_ -> Letters newText) matrix of
-          Nothing -> oldState
-          Just newMatrix -> oldState { activeSheet { cellState=CellState newMatrix } }
-        Just (Numeric _) -> case fromString newText of
-          Nothing -> oldState
-          Just asNumber -> case M.modify row col (\_ -> Numeric asNumber) matrix of
-            Just newMatrix -> oldState { activeSheet { cellState=CellState newMatrix } }
-            Nothing -> oldState
-        Nothing -> oldState
-        )
+  SetText newText row col -> H.modify_ (\oldState ->
+    case updateCellFromInput oldState newText row col of
+      Nothing -> oldState
+      Just newState -> newState
+    )
+    --H.modify_ (\oldState@(stRecord@{ activeSheet: oldSheet@({cellState: (CellState matrix) })}) ->
+    --  case M.get row col matrix of
+    --    Just (Letters _) -> case M.modify row col (\_ -> Letters newText) matrix of
+    --      Nothing -> oldState
+    --      Just newMatrix -> oldState { activeSheet { cellState=CellState newMatrix } }
+    --    Just (Numeric _) -> case fromString newText of
+    --      Nothing -> oldState
+    --      Just asNumber -> case M.modify row col (\_ -> Numeric asNumber) matrix of
+    --        Just newMatrix -> oldState { activeSheet { cellState=CellState newMatrix } }
+    --        Nothing -> oldState
+    --    Nothing -> oldState
+    --    )
+
+updateCellFromInput :: State -> String -> Int -> Int -> Maybe State
+updateCellFromInput oldState@{activeSheet: { cellState: CellState mtx }} input row col = do
+  currCell <- M.get row col mtx
+  newMatrix <- case currCell of
+    Letters _ -> M.modify row col (\_ -> Letters input) mtx
+    Numeric _ -> case fromString input of
+      Just myNum -> M.modify row col (\_ -> Numeric myNum) mtx
+      Nothing -> Nothing
+  pure $ oldState { activeSheet { cellState = CellState newMatrix } }
