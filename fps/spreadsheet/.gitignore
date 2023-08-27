@@ -10,3 +10,4 @@
 /.spago
 /dist
 /public
+.env

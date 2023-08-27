@@ -16,7 +16,6 @@ import Matrix (isEmpty, repeat, toIndexedArray, modify, get) as M
 import Sheet (CellState(..), Sheet, getSheet)
 import Primitives (Val(..))
 
-
 main :: Effect Unit
 main = HA.runHalogenAff do
   body <- HA.awaitBody
