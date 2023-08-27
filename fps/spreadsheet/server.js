@@ -29,8 +29,8 @@ app.get('/', (req, res) => {
 	})
 })
 
-app.get('/api', (req, res) => {
-	const proxyUrl = `http://${API_HOST}:${API_PORT}/${req.url.replace('/api', '')}`;
+app.get('/api/*', (req, res) => {
+	const proxyUrl = `http://${API_HOST}:${API_PORT}/${req.url.replace('/api/', '')}`;
 	console.log(`rerouting ${req.url} to ${proxyUrl}`);
 	const reqToApiServer = http.request(
 		proxyUrl,
