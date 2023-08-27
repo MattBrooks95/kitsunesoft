@@ -1,7 +1,7 @@
 {
   description = "Haskell project using Stack";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/23.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
