@@ -43,7 +43,7 @@ myRec = {
   }
 
 type Slots = (
-  sheet :: forall query. H.Slot query Void Int
+  sheet :: forall query. H.Slot query Void Unit
 )
 
 _sheet = Proxy :: Proxy "sheet"
@@ -69,7 +69,7 @@ component =
     , eval: H.mkEval $ H.defaultEval
     }
 
-render :: forall m action. State -> H.ComponentHTML action () m
+render :: forall m action. State -> H.ComponentHTML action Slots m
 render state =
   HH.div
     [ HP.classes [HH.ClassName "w-full h-full flex flex-col justify-center items-stretch"]
@@ -78,12 +78,11 @@ render state =
     HH.div [HP.classes [HH.ClassName "flex-shrink bg-red-200"]] [ HH.text "menu" ]
     --HH.button [HE.onClick \_ -> Decrement ] [HH.text "-" ]
     --, HH.button [HE.onClick \_ -> Increment ] [HH.text "+" ]
-    , HH.div [HP.classes [HH.ClassName "bg-blue-200"]] [
-        --HH.text $ show state.activeSheet.cellState
-        --, renderState state.activeSheet.cellState
-        -- renderState state.activeSheet.cellState
-        HH.slot_ _sheet 0 sheetC {sheetName: "sheet1" }
-        ]
+    , HH.div
+      [ HP.classes [HH.ClassName "bg-blue-200"]
+      ]
+      [ HH.slot_ _sheet unit sheetC { sheetName: "sheet1" }
+      ]
     ]
 
 

@@ -23,6 +23,7 @@ to generate this file without the comments in this block.
   , "prelude"
   , "transformers"
   , "tuples"
+  , "typelevel-prelude"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
