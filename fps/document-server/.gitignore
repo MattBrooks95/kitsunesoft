@@ -1,2 +1,5 @@
 .stack-work/
 *~
+# yesod makes this file by default for authentication
+# I'm not sure what authentication will look like for this application yet, but I can change it later
+/client_session_key.aes

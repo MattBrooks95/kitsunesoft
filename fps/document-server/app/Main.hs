@@ -1,6 +1,20 @@
-module Main (main) where
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
 
-import Lib
+import Yesod
+
+data HelloWorld = HelloWorld
+
+mkYesod "HelloWorld" [parseRoutes|
+/ HomeR GET
+|]
+
+instance Yesod HelloWorld
+
+getHomeR :: Handler Html
+getHomeR = defaultLayout [whamlet|Hello World!|]
 
 main :: IO ()
-main = someFunc
+main = warp 3000 HelloWorld

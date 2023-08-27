@@ -1,7 +1,7 @@
 {
   description = "Haskell project using Stack";
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/23.05";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
@@ -12,7 +12,7 @@
 
         # need to match Stackage LTS version
         # from stack.yaml resolver
-        hPkgs = pkgs.haskell.packages."ghc928";
+        hPkgs = pkgs.haskell.packages."ghc927";
 
         myDevTools = [
           hPkgs.ghc # GHC compiler in the desired version (will be available on PATH)
