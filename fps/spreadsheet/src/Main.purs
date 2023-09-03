@@ -13,10 +13,12 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
+import Type.Prelude (Proxy(..))
 import Matrix (isEmpty, repeat, toIndexedArray, modify, get) as M
+
 import Primitives (Val(..))
 import Sheet (CellState(..), Sheet, getSheet)
-import Type.Prelude (Proxy(..))
+import Menu (menuC)
 
 main :: Effect Unit
 main = HA.runHalogenAff do
@@ -75,7 +77,13 @@ render state =
     [ HP.classes [HH.ClassName "w-full h-full flex flex-col justify-center items-stretch"]
     ]
     [
-    HH.div [HP.classes [HH.ClassName "flex-shrink bg-red-200"]] [ HH.text "menu" ]
+    HH.div
+      [HP.classes
+        [HH.ClassName "flex-shrink bg-red-200"
+        ]
+      ]
+      [ HH.text "menu"
+      ]
     --HH.button [HE.onClick \_ -> Decrement ] [HH.text "-" ]
     --, HH.button [HE.onClick \_ -> Increment ] [HH.text "+" ]
     , HH.div
