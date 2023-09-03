@@ -1,45 +1,31 @@
 module Main where
 
 import Data.Maybe
+import Halogen.Aff
 import Prelude
 
 import Component.Sheet (sheetC)
 import Control.Monad.State (class MonadState)
 import Data.Number (fromString)
 import Effect (Effect)
+import Effect.Class (class MonadEffect)
+import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
-import Type.Prelude (Proxy(..))
 import Matrix (isEmpty, repeat, toIndexedArray, modify, get) as M
-
+import Menu (menuC, getState) as Menu
 import Primitives (Val(..))
 import Sheet (CellState(..), Sheet, getSheet)
-import Menu (
-  menuC
-  , getState
-  ) as Menu
+import Type.Prelude (Proxy(..))
 
 main :: Effect Unit
 main = HA.runHalogenAff do
   body <- HA.awaitBody
   runUI component unit body
-
-
---instance Show (Sheet Val) where
---  show ({ name: sheetName, rows: numRows, cols: numCols, cellState: cellS }) =
---    "(Sheet name:"
---    <> sheetName
---    <> " (rows:"
---    <> show numRows
---    <> ", cols:"
---    <> show numCols
---    <> ")"
---    <> show cellS
---    <> ")"
 
 myRec :: { name :: String, age :: Int }
 myRec = {
@@ -66,17 +52,25 @@ getState = { activeSheet: (getSheet :: Sheet Val)
 
 matrixSize = 5 :: Int
 
-initialState :: forall input. input -> State
+--initialState :: forall input. input -> State
 initialState _ = getState { activeSheet { cellState=CellState (M.repeat 5 5 (Letters "abc"))} }
 
+--component :: forall query input output m. H.Component query input output Effect
+--component :: forall query input output m. MonadEffect m => H.Component query input output m
 component =
   H.mkComponent
     { initialState
     , render
-    , eval: H.mkEval $ H.defaultEval
+    , eval: H.mkEval $ H.defaultEval {
+      handleAction = handleAction
+      --, initalize = Just Initialize
+      --, finalize = Just Finalize
+      }
     }
 
-render :: forall m action. State -> H.ComponentHTML action Slots m
+data Action = Initialize | Finalize
+
+render :: forall m. State -> H.ComponentHTML Action Slots m
 render state =
   HH.div
     [ HP.classes [HH.ClassName "w-full h-full flex flex-col justify-center items-stretch"]
@@ -98,5 +92,10 @@ render state =
       ]
     ]
 
-
-
+handleAction :: forall output m. MonadEffect m => Action -> H.HalogenM State Action Slots output m Unit
+--handleAction :: forall output. Action -> H.HalogenM State Action Slots output Effect Unit
+handleAction action = case action of
+  Initialize ->
+    log "component initialized"
+  Finalize ->
+    log "component finalized"
