@@ -20,6 +20,7 @@ to generate this file without the comments in this block.
   , "matrices"
   , "maybe"
   , "numbers"
+  , "ordered-collections"
   , "prelude"
   , "transformers"
   , "tuples"

@@ -18,7 +18,10 @@ import Matrix (isEmpty, repeat, toIndexedArray, modify, get) as M
 
 import Primitives (Val(..))
 import Sheet (CellState(..), Sheet, getSheet)
-import Menu (menuC)
+import Menu (
+  menuC
+  , getState
+  ) as Menu
 
 main :: Effect Unit
 main = HA.runHalogenAff do
@@ -46,9 +49,11 @@ myRec = {
 
 type Slots = (
   sheet :: forall query. H.Slot query Void Unit
-)
+  , menu :: forall query. H.Slot query Void Unit
+) -- TODO menu slot, use menu component
 
 _sheet = Proxy :: Proxy "sheet"
+_menu = Proxy :: Proxy "menu"
 
 type State = { activeSheet :: Sheet Val
   }
@@ -82,7 +87,7 @@ render state =
         [HH.ClassName "flex-shrink bg-red-200"
         ]
       ]
-      [ HH.text "menu"
+      [ HH.slot_ _menu unit Menu.menuC Menu.getState
       ]
     --HH.button [HE.onClick \_ -> Decrement ] [HH.text "-" ]
     --, HH.button [HE.onClick \_ -> Increment ] [HH.text "+" ]

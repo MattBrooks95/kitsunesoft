@@ -8,6 +8,7 @@ import Data.Functor (
   ) as F 
 
 import Data.Set as S
+import Data.Maybe
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -23,13 +24,19 @@ type FileState = {
 getAvailableArray :: FileState -> Array String
 getAvailableArray { available } = fromFoldable available
 
-type Input = {
-  fileState :: FileState
-}
+type Input = State
 
 type State = {
   fileState :: FileState
 }
+
+getState :: State
+getState = {
+  fileState: {
+      available: S.singleton defaultDocument
+      , active: defaultDocument
+    }
+  }
 
 menuC =
   H.mkComponent
@@ -38,13 +45,11 @@ menuC =
     , eval: H.mkEval $ H.defaultEval { handleAction = handleAction }
     }
 
-initialState :: Input -> State
-initialState inp
-  | S.isEmpty $ inp.fileState.available =
-    let fs = inp.fileState in
-    { fileState: (fs { active="new document", available=S.empty }) }
-  | otherwise = inp
+defaultDocument :: String
+defaultDocument = "new document"
 
+initialState :: Input -> State
+initialState state = state
 
 render :: forall w. State -> HH.HTML w Action
 render menuState =
@@ -62,7 +67,7 @@ render menuState =
     ]
 
 mkOption :: String -> forall w i. HH.HTML w i
-mkOption val = HH.option [ HP.value val] []
+mkOption val = HH.option [ HP.value val] [ HH.text val ]
 
 --type copy pasta'd from https://purescript-halogen.github.io/purescript-halogen/guide/02-Introducing-Components.html
 --not sure how I can learn to write these by hand, there will eventually be a case where
