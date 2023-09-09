@@ -6,9 +6,10 @@ import Prelude
 
 import Component.Sheet (sheetC)
 import Control.Monad.State (class MonadState)
-import Data.Argonaut (Json, jsonEmptyString, parseJson)
+import Data.Argonaut (Json, decodeJson, jsonEmptyString, parseJson)
 import Data.Either (Either(..))
 import Data.Number (fromString)
+import Data.String (joinWith)
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Class (class MonadAff)
@@ -21,7 +22,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
-import Interfaces.Sheet (sheetsFromJson)
+import Interfaces.Sheet (sheetsFromRequestText)
 import Matrix (isEmpty, repeat, toIndexedArray, modify, get) as M
 import Menu (menuC, getState) as Menu
 import Milkis as M
@@ -49,21 +50,23 @@ type Slots = (
 _sheet = Proxy :: Proxy "sheet"
 _menu = Proxy :: Proxy "menu"
 
-type State = { activeSheet :: Sheet Val
+type State = { activeSheet :: Maybe (Sheet Val)
   , loading :: Boolean
+  , sheetFilenames :: Maybe (Array String)
   }
 --instance Show State where
 --  show { activeSheet: sheet} = "(State " <> show sheet <> ")"
 
 getState :: State
-getState = { activeSheet: (getSheet :: Sheet Val)
+getState = { activeSheet: Nothing
   , loading: false
+  , sheetFilenames: Nothing
   }
 
 matrixSize = 5 :: Int
 
 initialState :: forall input. input -> State
-initialState _ = getState { activeSheet { cellState=CellState (M.repeat 5 5 (Letters "abc"))} }
+initialState _ = getState
 
 component :: forall query input output. H.Component query input output Aff
 --component :: forall query input output m. MonadEffect m => H.Component query input output m
@@ -91,6 +94,9 @@ render state =
         ]
       ]
       [ HH.slot_ _menu unit Menu.menuC Menu.getState
+      , (case state.sheetFilenames of
+        Nothing -> HH.span_ [ HH.text "no sheet filenames" ]
+        Just shts -> HH.span_ [ HH.text (joinWith " " shts) ])
       ]
     --HH.button [HE.onClick \_ -> Decrement ] [HH.text "-" ]
     --, HH.button [HE.onClick \_ -> Increment ] [HH.text "+" ]
@@ -113,6 +119,14 @@ handleAction action = case action of
         _asTxt <- M.text res
         H.liftEffect $ log ("to text success:" <> _asTxt)
         pure _asTxt
+    let shts = sheetsFromRequestText asTxt
+    H.modify_ \state -> state { sheetFilenames=Just shts }
+
+      --case parseJson asTxt of
+      --  Left e -> do
+      --    liftEffect $ log "failed to parse json"
+      --    pure []
+      --  Right sfl -> pure (decodeJson sfl :: Array String)
     --sheetFileList <- H.liftEffect $ case _response of
     --  Left e -> do
     --    liftEffect $ log (show e)
