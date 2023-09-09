@@ -5,13 +5,21 @@ import Primitives
 import Sheet
 
 import Control.Monad.State (class MonadState)
+import Data.Array (catMaybes, concat, (..), (:))
+import Data.Char (fromCharCode)
+import Data.Functor (map) as F
+import Data.Int (toNumber)
 import Data.Number (fromString)
+import Data.Number.Format (toString)
+import Data.String (joinWith)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import HtmlHelpers.Basic (mkSpan)
+import LanguageHelpers.Ranges (getCharacters, strFromC)
 import Matrix as M
-import Prelude (Unit, bind, const, map, otherwise, pure, show, ($), (<>), (<$>))
+import Prelude (Unit, bind, const, map, otherwise, pure, show, ($), (<$>), (<<<), (<>), (==))
 
 data Action = SetText String Int Int
   | Receive Input
@@ -46,7 +54,7 @@ initialState ({ sheetName: sheetN }) =
     , sheetName=sheetN
     }
 
-renderInput value row col =
+renderInput className value row col =
   let valAsString =
         case value of
           Letters str -> str
@@ -56,6 +64,7 @@ renderInput value row col =
   HH.input
     [ HP.value valAsString
     , HE.onValueInput (\str -> SetText str row col)
+    , HP.classes [ HH.ClassName "col-start-2" ]
     ]
 
 --handleAction :: forall m98 output m. MonadState State m98 => Action -> H.HalogenM State Action () output m Unit
@@ -93,12 +102,20 @@ updateCellFromInput oldState@{ cellState: oldCellState@(Just (CellState mtx)) } 
   --        Nothing -> Nothing
 
 --renderInputs :: forall w i. M.Matrix Val -> Array (HH.HTML w i)
-renderInputs m
-  | M.isEmpty m = []
-  | otherwise =
+renderInputs m =
     let asArray = M.toIndexedArray m
+        numCols = M.width
+        numRows = M.height
     in
-      map (\{value: v, x: row, y: col} -> renderInput v row col) asArray
+      map (\{value: v, x: row, y: col} -> renderInput (if col == 0 then Just "col-start-2" else Nothing) v row col) asArray
+
+--if I go down this route it looks like I have to manually tell each row its
+--row-start, which will not work. Maybe I need a nested grid?
+--getClassesForCell :: Int -> Int -> String
+--getClassesForCell row col = joinWith " " $ catMaybes [
+--    if col == 0 then Just "col-start-2" else Nothing
+--    , if row == 0 then Just "row-start-2" else Nothing
+--  ]
 
 -- w -> "widget", describes what components can be used in the html
 -- i -> "input", the type used to handle DOM events
@@ -106,13 +123,32 @@ renderInputs m
 renderState ({ cellState: cState }) =
   HH.div
     [
-      HP.classes [ HH.ClassName "grid gap-0.5" ]
+      HP.classes [ HH.ClassName "grid gap-0.5 flex-nowrap text-center" ]
     ]
-    case cState of
-      Nothing -> [ HH.span_ [ HH.text "no cells" ] ]
-      Just (CellState matrix) -> (
-        (renderInputs matrix) <>
-        [
-          HH.span_ [ HH.text "changed" ]
-        ]
+    (concat [ F.map (mkSpan "row-start-1") (getColHeaders)
+      , F.map (mkSpan "col-start-1") (getRowHeaders)
+      , (case cState of
+          Nothing -> [ HH.span_ [ HH.text "no cells" ] ]
+          Just (CellState matrix) -> (
+            renderInputs matrix
+            )
         )
+      ])
+
+    --case cState of
+    --  Nothing -> [ HH.span_ [ HH.text "no cells" ] ]
+    --  Just (CellState matrix) -> (
+    --    if M.isEmpty matrix
+    --    then []
+    --    else
+    --      (renderInputs matrix) <>
+    --      [
+    --        HH.span_ [ HH.text "changed" ]
+    --      ]
+    --      )
+
+getColHeaders :: Array String
+getColHeaders = "":map (strFromC) (getCharacters 65 90)
+
+getRowHeaders :: Array String
+getRowHeaders = map (toString <<< toNumber) (1..26)

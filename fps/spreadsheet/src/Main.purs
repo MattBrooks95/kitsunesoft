@@ -10,6 +10,7 @@ import Data.Argonaut (Json, decodeJson, jsonEmptyString, parseJson)
 import Data.Either (Either(..))
 import Data.Number (fromString)
 import Data.String (joinWith)
+import Data.Set as S
 import Effect (Effect)
 import Effect.Aff (Aff, attempt)
 import Effect.Aff.Class (class MonadAff)
@@ -93,19 +94,21 @@ render state =
         [HH.ClassName "flex-shrink bg-red-200"
         ]
       ]
-      [ HH.slot_ _menu unit Menu.menuC Menu.getState
-      , (case state.sheetFilenames of
-        Nothing -> HH.span_ [ HH.text "no sheet filenames" ]
-        Just shts -> HH.span_ [ HH.text (joinWith " " shts) ])
+      [ HH.slot_ _menu unit Menu.menuC (getSheetsForMenu state.sheetFilenames)
+      --, (case state.sheetFilenames of
+      --  Nothing -> HH.span_ [ HH.text "no sheet filenames" ]
+      --  Just shts -> HH.span_ [ HH.text (joinWith " " shts) ])
       ]
-    --HH.button [HE.onClick \_ -> Decrement ] [HH.text "-" ]
-    --, HH.button [HE.onClick \_ -> Increment ] [HH.text "+" ]
     , HH.div
       [ HP.classes [HH.ClassName "bg-blue-200"]
       ]
       [ HH.slot_ _sheet unit sheetC { sheetName: "sheet1" }
       ]
     ]
+
+getSheetsForMenu :: Maybe (Array String) -> S.Set String
+getSheetsForMenu Nothing = S.empty
+getSheetsForMenu (Just sheets) = S.fromFoldable sheets
 
 handleAction :: forall slots o m. MonadAff m => Action -> H.HalogenM State Action Slots o m Unit
 handleAction action = case action of
@@ -121,26 +124,6 @@ handleAction action = case action of
         pure _asTxt
     let shts = sheetsFromRequestText asTxt
     H.modify_ \state -> state { sheetFilenames=Just shts }
-
-      --case parseJson asTxt of
-      --  Left e -> do
-      --    liftEffect $ log "failed to parse json"
-      --    pure []
-      --  Right sfl -> pure (decodeJson sfl :: Array String)
-    --sheetFileList <- H.liftEffect $ case _response of
-    --  Left e -> do
-    --    liftEffect $ log (show e)
-    --    pure []
-    --  Right response -> do
-    --    asTxt <- M.text response
-    --    asValue <- case parseJson asTxt of
-    --                    Left e -> do
-    --                      liftEffect $ log "parseJson error"
-    --                      pure jsonEmptyString
-    --                    Right jsonRes -> pure jsonRes
-    --    liftEffect $ log (show asValue)
-    --s <- H.get
-    --H.put s
     liftEffect $ log "component initialized"
   Finalize -> do
     --s <- H.get

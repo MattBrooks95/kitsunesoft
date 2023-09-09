@@ -19,6 +19,7 @@ to generate this file without the comments in this block.
   , "effect"
   , "either"
   , "halogen"
+  , "integers"
   , "lists"
   , "matrices"
   , "maybe"

@@ -5,6 +5,7 @@
     "bundle": "spago bundle-app --main Main --to dist/index.js && cp -r dist/** public/",
     "clean": "rm -rf ./public",
     "dev": "npm run clean && mkdir -p public && npm run watch",
+	"server": "node server.js",
     "tw": "tailwindcss -i ./main.css -o ./dist/main.css"
   },
   "devDependencies": {
