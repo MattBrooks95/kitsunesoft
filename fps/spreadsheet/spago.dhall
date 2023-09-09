@@ -12,13 +12,17 @@ to generate this file without the comments in this block.
 -}
 { name = "fsp - spreadsheets"
 , dependencies =
-  [ "arrays"
+  [ "aff"
+  , "argonaut"
+  , "arrays"
   , "console"
   , "effect"
+  , "either"
   , "halogen"
   , "lists"
   , "matrices"
   , "maybe"
+  , "milkis"
   , "numbers"
   , "ordered-collections"
   , "prelude"

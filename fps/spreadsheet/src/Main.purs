@@ -6,18 +6,26 @@ import Prelude
 
 import Component.Sheet (sheetC)
 import Control.Monad.State (class MonadState)
+import Data.Argonaut (Json, jsonEmptyString, parseJson)
+import Data.Either (Either(..))
 import Data.Number (fromString)
 import Effect (Effect)
-import Effect.Class (class MonadEffect)
+import Effect.Aff (Aff, attempt)
+import Effect.Aff.Class (class MonadAff)
+import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
+import Halogen (liftAff)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
+import Interfaces.Sheet (sheetsFromJson)
 import Matrix (isEmpty, repeat, toIndexedArray, modify, get) as M
 import Menu (menuC, getState) as Menu
+import Milkis as M
+import Milkis.Impl.Window as MW
 import Primitives (Val(..))
 import Sheet (CellState(..), Sheet, getSheet)
 import Type.Prelude (Proxy(..))
@@ -42,20 +50,22 @@ _sheet = Proxy :: Proxy "sheet"
 _menu = Proxy :: Proxy "menu"
 
 type State = { activeSheet :: Sheet Val
+  , loading :: Boolean
   }
 --instance Show State where
 --  show { activeSheet: sheet} = "(State " <> show sheet <> ")"
 
 getState :: State
 getState = { activeSheet: (getSheet :: Sheet Val)
+  , loading: false
   }
 
 matrixSize = 5 :: Int
 
---initialState :: forall input. input -> State
+initialState :: forall input. input -> State
 initialState _ = getState { activeSheet { cellState=CellState (M.repeat 5 5 (Letters "abc"))} }
 
---component :: forall query input output m. H.Component query input output Effect
+component :: forall query input output. H.Component query input output Aff
 --component :: forall query input output m. MonadEffect m => H.Component query input output m
 component =
   H.mkComponent
@@ -63,14 +73,13 @@ component =
     , render
     , eval: H.mkEval $ H.defaultEval {
       handleAction = handleAction
-      --, initalize = Just Initialize
-      --, finalize = Just Finalize
+      , initialize = Just Initialize
       }
     }
 
 data Action = Initialize | Finalize
 
-render :: forall m. State -> H.ComponentHTML Action Slots m
+render :: forall m. MonadAff m => State -> H.ComponentHTML Action Slots m
 render state =
   HH.div
     [ HP.classes [HH.ClassName "w-full h-full flex flex-col justify-center items-stretch"]
@@ -92,10 +101,34 @@ render state =
       ]
     ]
 
-handleAction :: forall output m. MonadEffect m => Action -> H.HalogenM State Action Slots output m Unit
---handleAction :: forall output. Action -> H.HalogenM State Action Slots output Effect Unit
+handleAction :: forall slots o m. MonadAff m => Action -> H.HalogenM State Action Slots o m Unit
 handleAction action = case action of
-  Initialize ->
-    log "component initialized"
-  Finalize ->
-    log "component finalized"
+  Initialize -> do
+    _response <- H.liftAff $ (attempt $ M.fetch MW.windowFetch (M.URL "/api/sheets") M.defaultFetchOptions)
+    asTxt <- H.liftAff $ case _response of
+      Left err -> do
+        H.liftEffect $ log "error converting to text"
+        pure ""
+      Right res -> do
+        _asTxt <- M.text res
+        H.liftEffect $ log ("to text success:" <> _asTxt)
+        pure _asTxt
+    --sheetFileList <- H.liftEffect $ case _response of
+    --  Left e -> do
+    --    liftEffect $ log (show e)
+    --    pure []
+    --  Right response -> do
+    --    asTxt <- M.text response
+    --    asValue <- case parseJson asTxt of
+    --                    Left e -> do
+    --                      liftEffect $ log "parseJson error"
+    --                      pure jsonEmptyString
+    --                    Right jsonRes -> pure jsonRes
+    --    liftEffect $ log (show asValue)
+    --s <- H.get
+    --H.put s
+    liftEffect $ log "component initialized"
+  Finalize -> do
+    --s <- H.get
+    --H.put s
+    liftEffect $ log "component finalized"
