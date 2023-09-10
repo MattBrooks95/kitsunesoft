@@ -81,41 +81,13 @@ updateCellFromInput oldState@{ cellState: oldCellState@(Just (CellState mtx)) } 
   updateCellState = \newM -> oldState { cellState=Just $ CellState newM }
   newMatrix :: Maybe (M.Matrix Val)
   newMatrix =
-    let currCell = getCell row col mtx
+    let currCell = M.get row col mtx
     in do
       newValue <- case currCell of
         Just (Letters _) -> Just $ Letters input
         Just (Numeric _) -> Numeric <$> fromString input
         _ -> Nothing
       M.modify row col (\_ -> newValue) mtx
-  getCell :: Int -> Int -> M.Matrix Val -> Maybe Val
-  getCell = M.get
-  --case M.get row col mtx of
-  --  Nothing -> oldState
-  --  Just currCell ->
-  --    case currCell of
-  --      Letters _ -> case M.modify row col (\_ -> Letters input) mtx of
-  --        Nothing -> oldState
-  --        Just newMatrix -> oldState { cellState = CellState newMatrix }
-  --      Numeric _ -> case fromString input of
-  --        Just myNum -> M.modify row col (\_ -> Numeric myNum) mtx
-  --        Nothing -> Nothing
-
---renderInputs :: forall w i. M.Matrix Val -> Array (HH.HTML w i)
---renderInputs m =
---    let asArray = M.toIndexedArray m
---        numCols = M.width
---        numRows = M.height
---    in
---      map (\{value: v, x: row, y: col} -> renderInput (if col == 0 then Just "col-start-2" else Nothing) v row col) asArray
-
---if I go down this route it looks like I have to manually tell each row its
---row-start, which will not work. Maybe I need a nested grid?
---getClassesForCell :: Int -> Int -> String
---getClassesForCell row col = joinWith " " $ catMaybes [
---    if col == 0 then Just "col-start-2" else Nothing
---    , if row == 0 then Just "row-start-2" else Nothing
---  ]
 
 -- w -> "widget", describes what components can be used in the html
 -- i -> "input", the type used to handle DOM events
@@ -127,13 +99,6 @@ renderState ({ cellState: cState }) =
     ]
     (concat [ F.map (mkSpan "row-start-1") (getColHeaders)
     , renderRows cState
-      --, F.map (mkSpan "col-start-1") (getRowHeaders)
-      --, (case cState of
-      --    Nothing -> [ HH.span_ [ HH.text "no cells" ] ]
-      --    Just (CellState matrix) -> (
-      --      renderInputs matrix
-      --      )
-      --  )
       ])
 
 renderRows :: forall w. Maybe (CellState Val) -> Array (HH.HTML w Action)
@@ -145,28 +110,18 @@ renderRows (Just (CellState matrix)) =
       cols = 0..(numCols - 1) :: Array Int
   in
     --map (\r -> HH.span_ [ HH.text (toString (toNumber r)) ]) rows
+    --rendering a 2d matrix as input elemnts
+    --each row starts with a span that contains the row number
     foldl (\acc row ->
         acc <> (map (\col -> 
           if col == 0
-          then HH.span [ HP.classes [HH.ClassName "col-start-1"] ] [ HH.text (show row) ]
+          then HH.span [ HP.classes [HH.ClassName "col-start-1 text-center"] ] [ HH.text (show row) ]
           else
             case M.get row col matrix of
               Nothing -> HH.span_ [ HH.text ("error, row" <> show row <> " col" <> show col) ]
               Just val -> renderInput "" val row col
           ) cols)
       ) [] rows
-
-    --case cState of
-    --  Nothing -> [ HH.span_ [ HH.text "no cells" ] ]
-    --  Just (CellState matrix) -> (
-    --    if M.isEmpty matrix
-    --    then []
-    --    else
-    --      (renderInputs matrix) <>
-    --      [
-    --        HH.span_ [ HH.text "changed" ]
-    --      ]
-    --      )
 
 getColHeaders :: Array String
 getColHeaders = "":map (strFromC) (getCharacters 65 90)

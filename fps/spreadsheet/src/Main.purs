@@ -95,13 +95,8 @@ render state =
         ]
       ]
       [ HH.slot_ _menu unit Menu.menuC (getSheetsForMenu state.sheetFilenames)
-      --, (case state.sheetFilenames of
-      --  Nothing -> HH.span_ [ HH.text "no sheet filenames" ]
-      --  Just shts -> HH.span_ [ HH.text (joinWith " " shts) ])
       ]
-    , HH.div
-      [ HP.classes [HH.ClassName "bg-blue-200"]
-      ]
+    , HH.div_
       [ HH.slot_ _sheet unit sheetC { sheetName: "sheet1" }
       ]
     ]
