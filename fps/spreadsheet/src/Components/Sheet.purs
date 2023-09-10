@@ -136,7 +136,7 @@ renderState ({ cellState: cState }) =
       --  )
       ])
 
---renderRows :: forall i w. Maybe (CellState Val) -> Array (HH.HTML i w)
+renderRows :: forall w. Maybe (CellState Val) -> Array (HH.HTML w Action)
 renderRows Nothing = [ HH.span_ [ HH.text "no cells" ] ]
 renderRows (Just (CellState matrix)) =
   let numRows = M.height matrix :: Int
