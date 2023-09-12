@@ -12,17 +12,25 @@ to generate this file without the comments in this block.
 -}
 { name = "fsp - spreadsheets"
 , dependencies =
-  [ "arrays"
+  [ "aff"
+  , "argonaut"
+  , "arrays"
   , "console"
   , "effect"
+  , "either"
   , "halogen"
+  , "integers"
   , "lists"
   , "matrices"
   , "maybe"
+  , "milkis"
   , "numbers"
+  , "ordered-collections"
   , "prelude"
+  , "strings"
   , "transformers"
   , "tuples"
+  , "typelevel-prelude"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

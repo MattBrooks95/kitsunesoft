@@ -2,7 +2,11 @@
 module.exports = {
   content: ["./src/**/*.purs"],
   theme: {
-    extend: {},
+    extend: {
+		gridTemplateColumns: {
+			'auto': 'auto',
+		}
+	},
   },
   plugins: [],
 }

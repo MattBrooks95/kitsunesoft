@@ -43,3 +43,16 @@ getSheet =
   , cellState: CellState (M.empty :: M.Matrix a)
   , selectedCell: T.Tuple (Row 0) (Cell 0)
   }
+
+--instance Show (Sheet Val) where
+--  show ({ name: sheetName, rows: numRows, cols: numCols, cellState: cellS }) =
+--    "(Sheet name:"
+--    <> sheetName
+--    <> " (rows:"
+--    <> show numRows
+--    <> ", cols:"
+--    <> show numCols
+--    <> ")"
+--    <> show cellS
+--    <> ")"
+
