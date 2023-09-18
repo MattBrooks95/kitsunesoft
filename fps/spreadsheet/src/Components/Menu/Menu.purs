@@ -3,7 +3,6 @@ module Menu where
 import Data.Maybe
 import Prelude
 
-import Data.Array (fromFoldable)
 import Data.Array (fromFoldable, (:))
 import Data.Functor (map) as F
 import Data.Set as S
@@ -12,6 +11,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import HtmlHelpers.Basic (mkOption)
+
+data Output = DocumentSelected String
 
 data Action = SelectFile String
   | Receive (S.Set String)
@@ -74,9 +75,10 @@ render menuState =
 --type copy pasta'd from https://purescript-halogen.github.io/purescript-halogen/guide/02-Introducing-Components.html
 --not sure how I can learn to write these by hand, there will eventually be a case where
 --I have to update the state and do an IO effect of some sort
-handleAction :: forall output m. Action -> H.HalogenM State Action () output m Unit
+handleAction :: forall m. Action -> H.HalogenM State Action () Output m Unit
 handleAction action = case action of
-  SelectFile newFilename ->
+  SelectFile newFilename -> do
     H.modify_ (\oldState@({ fileState: fs }) -> oldState { fileState=fs { active=newFilename }})
+    H.raise $ DocumentSelected newFilename
   Receive filenames ->
     H.modify_ (\oldState@({ fileState: fs }) -> oldState { fileState=fs { available=filenames } })

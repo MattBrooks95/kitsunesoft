@@ -25,7 +25,7 @@ instance Yesod HelloWorld
 
 dummySheets :: M.Map T.Text T.Text
 dummySheets = M.fromList [
-    ("sheet1", "a,b,c,d,e,f")
+    ("sheet1", "a,b,c,d,e,f\nalpha,beta,charlie,delta,epsilon,function,gratin")
     , ("sheet2", "g,h,i,j,k,l,m,n")
     , ("sheet3", "o,p,q,r,s,t,u,v,w,x,y,z")
     ]
