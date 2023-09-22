@@ -86,7 +86,7 @@ normalizeRow targetSize row =
     rowLen = length row
   in
   if rowLen < trace ("target size:" <> show targetSize <> " row len:" <> show rowLen) \_ -> targetSize
-  then concat [row, replicate (rowLen - targetSize) ""]
+  then concat [row, replicate (targetSize - rowLen) ""]
   -- this take should be unnecessary, if you properly measured the length of
   -- the longest row and passed it into this function
   else take targetSize row
