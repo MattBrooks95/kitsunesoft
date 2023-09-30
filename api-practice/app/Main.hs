@@ -1,6 +1,9 @@
 module Main (main) where
 
-import Lib
+import qualified Data.ByteString as BS
+import Utils.LoadEnv (parseEnv)
 
 main :: IO ()
-main = someFunc
+main = do
+    envFileContents <- BS.readFile ".env"
+    env <- parseEnv
