@@ -29,7 +29,6 @@ library
       AlphaVantage.Search
       AlphaVantage.Types
       Config.Config
-      Lib
       Utils.LoadEnv
   other-modules:
       Paths_api_practice

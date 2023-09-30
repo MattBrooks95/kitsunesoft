@@ -1,12 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Utils.LoadEnv (
     parseEnv
+    , runParseEnv
     ) where
 
 import qualified Data.Map as M
 import qualified Data.Attoparsec.ByteString as AP
 import qualified Data.ByteString as BS
 import qualified Data.Word8 as W
+
+type EnvParseResult = M.Map BS.ByteString BS.ByteString
+
+runParseEnv :: BS.ByteString -> Either String EnvParseResult
+runParseEnv = AP.parseOnly parseEnv
+
 
 parseEnv :: AP.Parser (M.Map BS.ByteString BS.ByteString)
 parseEnv = M.fromList <$> AP.sepBy' parseLine (AP.word8 W._lf)
