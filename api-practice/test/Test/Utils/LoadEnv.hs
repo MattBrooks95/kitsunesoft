@@ -35,6 +35,9 @@ testParse = TestList [
     , TestCase (
         assertEqual "no equals sign, no items"
         (Right M.empty)
-        (AP.parseOnly parseEnv "val1var1val2var3")
+        (AP.parseOnly parseEnv "var1val1var2val3")
+    )
+    , TestCase (
+        Right M.empty @=? AP.parseOnly parseEnv "var1val1\nvar2val2"
     )
     ]
