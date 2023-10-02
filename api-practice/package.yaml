@@ -25,6 +25,8 @@ dependencies:
 - containers
 - bytestring
 - word8
+- HUnit
+- raw-strings-qq
 
 ghc-options:
 - -Wall

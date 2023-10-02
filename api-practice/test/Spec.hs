@@ -1,2 +1,10 @@
+import Test.HUnit
+import Test.Utils.LoadEnv (
+    testParse
+    )
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = do
+    runTestTT testParse
+    return ()
+
