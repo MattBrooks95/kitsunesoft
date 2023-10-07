@@ -27,6 +27,12 @@ dependencies:
 - word8
 - HUnit
 - raw-strings-qq
+- filepath
+- exceptions
+- url
+- http-client-tls
+- http-client
+- http-types
 
 ghc-options:
 - -Wall
