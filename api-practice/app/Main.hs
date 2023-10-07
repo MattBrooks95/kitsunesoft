@@ -56,22 +56,44 @@ searchTicker ticker = do
     response <- liftIO $ httpLbs request manager
     return $ eitherDecode (responseBody response)
 
+-- up next, refactor the env variable getting and manager setup into a setup
+-- function, so that they can be used in ghci
+
+getEnv :: FilePath -> IO (M.Map BS.ByteString BS.ByteString)
+getEnv fp = do
+    envFileContents <- BS.readFile fp
+    getEnvFromFile envFileContents
+
+mkHttpManager_ :: ManagerSettings -> IO Manager
+mkHttpManager_ = newManager
+
+mkHttpManager :: IO Manager
+mkHttpManager = mkHttpManager_ tlsManagerSettings
+
+initialize :: IO (Either String QueryEnv)
+initialize = do
+    envMap <- getEnv ".env"
+    let apiKeyLookup = M.lookup "API_KEY" envMap
+    httpsManager <- mkHttpManager
+    case apiKeyLookup of
+        Nothing -> return $ Left "couldn't find api key in environment map"
+        Just key ->
+            return $ Right $ QueryEnv {
+                apiKey=key
+                , http=httpsManager
+                }
+        --Left "couldn't find api key in environment map")
+
 main :: IO ()
 main = do
-    envFileContents <- BS.readFile ".env"
-    envParseResult <- getEnvFromFile envFileContents
-    print $ "env map size:" <> (show . M.size) envParseResult
-    let apiKeyLookup = M.lookup "API_KEY" envParseResult
-    when (isNothing apiKeyLookup) (die "couldn't find api key")
-    let apiKey = fromJust apiKeyLookup
-    httpsManager <- newManager tlsManagerSettings
-    let queryEnv = QueryEnv {
-        apiKey=apiKey
-        , http=httpsManager
-        }
+    _queryEnvEither <- initialize
+    -- is there a cleaner way to do this? I wanted to use "when"
+    queryEnv@(QueryEnv { http=httpsManager, apiKey=key }) <- case _queryEnvEither of
+            Left errMsg -> die errMsg
+            Right qv -> return qv
     print "main done"
     let testTicker = "toyota"
-    let searchUrl = AVU.search testTicker (show apiKey)
+    let searchUrl = AVU.search testTicker (show key)
     print $ "searchUrl:" ++ U.exportURL searchUrl
     request <- parseRequest (U.exportURL searchUrl)
     response <- httpLbs request httpsManager
