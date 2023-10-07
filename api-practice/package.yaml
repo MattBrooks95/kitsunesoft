@@ -33,6 +33,8 @@ dependencies:
 - http-client-tls
 - http-client
 - http-types
+- aeson
+- text
 
 ghc-options:
 - -Wall

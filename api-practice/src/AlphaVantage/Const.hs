@@ -8,6 +8,7 @@ module AlphaVantage.Const (
     , functionQueryP
     , queryUrlPath
     , keywordsQueryP
+    , searchBestMatches
     ) where
 
 functionQueryP :: String
@@ -33,3 +34,6 @@ queryUrlPath = "query"
 
 keywordsQueryP :: String
 keywordsQueryP = "keywords"
+
+searchBestMatches :: String
+searchBestMatches = "bestMatches"

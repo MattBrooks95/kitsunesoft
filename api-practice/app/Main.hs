@@ -22,6 +22,12 @@ import Network.HTTP.Types.Status (statusCode)
 import qualified Network.URL as U
 
 import qualified AlphaVantage.Urls as AVU
+import Data.Aeson (decode, eitherDecode)
+import AlphaVantage.Search (
+    SearchResults (bestMatches)
+    , SearchResult(..)
+    )
+import Data.Text (intercalate)
 
 getEnvFromFile :: BS.ByteString -> IO (M.Map BS.ByteString BS.ByteString)
 getEnvFromFile parseTarget = do
@@ -47,7 +53,17 @@ main = do
     request <- parseRequest (U.exportURL searchUrl)
     response <- httpLbs request httpsManager
     putStrLn $ "status code:" ++ show (statusCode $ responseStatus response)
-    print $ responseBody response
+    let responseContents = responseBody response
+    print responseContents
+    parseResult <-
+            case eitherDecode responseContents :: Either String SearchResults of
+                Left err -> die err
+                Right asObject -> do
+                    print "object decode successful"
+                    print asObject
+                    return asObject
+    print $ (length . bestMatches) parseResult
+    print $ intercalate "|" (map searchSymbol (bestMatches parseResult))
     --tickerSearchResults <- httpJSONEither (AVU.search testTicker)
     --print "done"
     --case tickerSearchResults of
