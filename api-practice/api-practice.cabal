@@ -51,6 +51,7 @@ library
     , http-client
     , http-client-tls
     , http-types
+    , mtl
     , raw-strings-qq
     , text
     , url
@@ -77,6 +78,7 @@ executable api-practice-exe
     , http-client
     , http-client-tls
     , http-types
+    , mtl
     , raw-strings-qq
     , text
     , url
@@ -105,6 +107,7 @@ test-suite api-practice-test
     , http-client
     , http-client-tls
     , http-types
+    , mtl
     , raw-strings-qq
     , text
     , url

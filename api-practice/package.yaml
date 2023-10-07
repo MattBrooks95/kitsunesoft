@@ -35,6 +35,7 @@ dependencies:
 - http-types
 - aeson
 - text
+- mtl
 
 ghc-options:
 - -Wall
