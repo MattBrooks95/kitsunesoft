@@ -91,10 +91,8 @@ main = do
     queryEnv@(QueryEnv { http=httpsManager, apiKey=key }) <- case _queryEnvEither of
             Left errMsg -> die errMsg
             Right qv -> return qv
-    print "main done"
     let testTicker = "toyota"
     let searchUrl = AVU.search testTicker (show key)
-    print $ "searchUrl:" ++ U.exportURL searchUrl
     request <- parseRequest (U.exportURL searchUrl)
     response <- httpLbs request httpsManager
     putStrLn $ "status code:" ++ show (statusCode $ responseStatus response)
@@ -109,18 +107,3 @@ main = do
                     print asObject
                     return asObject
     print parseResult
-            --case eitherDecode responseContents :: Either String SearchResults of
-            --    Left err -> die err
-            --    Right asObject -> do
-            --        print "object decode successful"
-            --        print asObject
-            --        return asObject
-    --print $ (length . bestMatches) parseResult
-    --print $ intercalate "|" (map searchSymbol (bestMatches parseResult))
-
-    --tickerSearchResults <- httpJSONEither (AVU.search testTicker)
-    --print "done"
-    --case tickerSearchResults of
-    --    Left errMsg -> print errMsg
-    --    Right results -> do
-    --        print $ "request succeeded, results:" <> show results
