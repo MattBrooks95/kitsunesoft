@@ -45,6 +45,14 @@ getEnvFromFile parseTarget = do
             return M.empty
         Right envParseResult -> return envParseResult
 
+-- helper that runs the IO action if the requisite Either is a Right
+-- I feel like there's probably some helper in the standard lib for this
+-- that is more general
+-- this is nice for use in GHCi
+runRight :: Either e a -> (a -> IO c) -> IO (Either e c)
+runRight (Left e) _ = return $ Left e
+runRight (Right use) act = Right <$> act use
+
 --TODO MonadThrow is necessary here for parseRequest, but I'm not sure how to handle it
 --if it threw something. Wondering if I can wrap it (parseRequest) to return a Maybe instead
 searchTicker :: (MonadIO m, MonadThrow m) => String -> ReaderT QueryEnv m (Either String SearchResults)
