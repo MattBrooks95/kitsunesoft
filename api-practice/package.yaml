@@ -36,6 +36,7 @@ dependencies:
 - aeson
 - text
 - mtl
+- extra
 
 ghc-options:
 - -Wall

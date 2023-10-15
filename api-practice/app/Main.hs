@@ -1,6 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main (main) where
 
+import System.FilePath (
+    (</>)
+    )
+
 import qualified Data.ByteString as BS
 import qualified Data.Map as M
 import Utils.LoadEnv (
@@ -24,7 +28,10 @@ import qualified Network.URL as U
 
 import qualified AlphaVantage.Urls as AVU
 import QueryEnv.QueryEnv (QueryEnv (..))
-import AlphaVantage.Fetches (searchTicker)
+import DataConfig.DataConfig (DataConfig, getDataConfig, dcDaily, DailyConfig (..))
+import Data.Either (isLeft)
+import Data.Either.Extra (fromRight')
+import AlphaVantage.Fetches (getDaily)
 
 -- helper that runs the IO action if the requisite Either is a Right
 -- I feel like there's probably some helper in the standard lib for this
@@ -70,6 +77,9 @@ initialize = do
                 }
         --Left "couldn't find api key in environment map")
 
+dataConfigLocation :: FilePath
+dataConfigLocation = "config" </> "data.json"
+
 main :: IO ()
 main = do
     _queryEnvEither <- initialize
@@ -77,19 +87,10 @@ main = do
     queryEnv@(QueryEnv { qeHttp=httpsManager, qeApiKey=key }) <- case _queryEnvEither of
             Left errMsg -> die errMsg
             Right qv -> return qv
-    let testTicker = "toyota"
-    let searchUrl = AVU.search testTicker (show key)
-    request <- parseRequest (U.exportURL searchUrl)
-    response <- httpLbs request httpsManager
-    putStrLn $ "status code:" ++ show (statusCode $ responseStatus response)
-    let responseContents = responseBody response
-    print responseContents
-    tryToRequest <- runReaderT (searchTicker testTicker) queryEnv
-    parseResult <-
-        case tryToRequest of
-            Left err -> die err
-            Right asObject -> do
-                print "object decode successful"
-                print asObject
-                return asObject
-    print parseResult
+    _dataConfig <- getDataConfig dataConfigLocation
+    when (isLeft _dataConfig) (die "failed to read data config, nothing to do")
+    let dataConfig = fromRight' _dataConfig
+    print dataConfig
+    dailyResults <- mapM (\ticker -> runReaderT (getDaily ticker) queryEnv) ((tickers . dcDaily) dataConfig)
+    print dailyResults
+

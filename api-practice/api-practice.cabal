@@ -35,6 +35,7 @@ library
       AlphaVantage.Types
       AlphaVantage.Urls
       Config.Config
+      DataConfig.DataConfig
       QueryEnv.QueryEnv
       Utils.LoadEnv
       Utils.Urls
@@ -51,6 +52,7 @@ library
     , bytestring
     , containers
     , exceptions
+    , extra
     , filepath
     , http-client
     , http-client-tls
@@ -78,6 +80,7 @@ executable api-practice-exe
     , bytestring
     , containers
     , exceptions
+    , extra
     , filepath
     , http-client
     , http-client-tls
@@ -107,6 +110,7 @@ test-suite api-practice-test
     , bytestring
     , containers
     , exceptions
+    , extra
     , filepath
     , http-client
     , http-client-tls
