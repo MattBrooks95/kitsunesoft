@@ -31,19 +31,9 @@ import AlphaVantage.Search (
 import Data.Text (intercalate)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.Catch (MonadThrow, MonadCatch (catch))
-
-data QueryEnv = QueryEnv {
-    http :: Manager
-    , apiKey :: BS.ByteString
-    }
-
-getEnvFromFile :: BS.ByteString -> IO (M.Map BS.ByteString BS.ByteString)
-getEnvFromFile parseTarget = do
-    case runParseEnv parseTarget of
-        Left err -> do
-            print $ "failed to parse env file:" ++ err
-            return M.empty
-        Right envParseResult -> return envParseResult
+import Config.Config (Config(..))
+import QueryEnv.QueryEnv (QueryEnv (..))
+import AlphaVantage.Fetches (searchTicker)
 
 -- helper that runs the IO action if the requisite Either is a Right
 -- I feel like there's probably some helper in the standard lib for this
@@ -52,17 +42,6 @@ getEnvFromFile parseTarget = do
 runRight :: Either e a -> (a -> IO c) -> IO (Either e c)
 runRight (Left e) _ = return $ Left e
 runRight (Right use) act = Right <$> act use
-
---TODO MonadThrow is necessary here for parseRequest, but I'm not sure how to handle it
---if it threw something. Wondering if I can wrap it (parseRequest) to return a Maybe instead
-searchTicker :: (MonadIO m, MonadThrow m) => String -> ReaderT QueryEnv m (Either String SearchResults)
-searchTicker ticker = do
-    QueryEnv { apiKey=apiKey, http=manager } <- ask
-    let searchUrl = AVU.search ticker (show apiKey)
-    liftIO $ print $ "searchUrl:" ++ U.exportURL searchUrl
-    request <- parseRequest (U.exportURL searchUrl)
-    response <- liftIO $ httpLbs request manager
-    return $ eitherDecode (responseBody response)
 
 -- up next, refactor the env variable getting and manager setup into a setup
 -- function, so that they can be used in ghci
@@ -78,6 +57,14 @@ mkHttpManager_ = newManager
 mkHttpManager :: IO Manager
 mkHttpManager = mkHttpManager_ tlsManagerSettings
 
+getEnvFromFile :: BS.ByteString -> IO (M.Map BS.ByteString BS.ByteString)
+getEnvFromFile parseTarget = do
+    case runParseEnv parseTarget of
+        Left err -> do
+            print $ "failed to parse env file:" ++ err
+            return M.empty
+        Right envParseResult -> return envParseResult
+
 initialize :: IO (Either String QueryEnv)
 initialize = do
     envMap <- getEnv ".env"
@@ -87,8 +74,8 @@ initialize = do
         Nothing -> return $ Left "couldn't find api key in environment map"
         Just key ->
             return $ Right $ QueryEnv {
-                apiKey=key
-                , http=httpsManager
+                qeApiKey=key
+                , qeHttp=httpsManager
                 }
         --Left "couldn't find api key in environment map")
 
@@ -96,7 +83,7 @@ main :: IO ()
 main = do
     _queryEnvEither <- initialize
     -- is there a cleaner way to do this? I wanted to use "when"
-    queryEnv@(QueryEnv { http=httpsManager, apiKey=key }) <- case _queryEnvEither of
+    queryEnv@(QueryEnv { qeHttp=httpsManager, qeApiKey=key }) <- case _queryEnvEither of
             Left errMsg -> die errMsg
             Right qv -> return qv
     let testTicker = "toyota"

@@ -27,12 +27,14 @@ library
   exposed-modules:
       AlphaVantage.Const
       AlphaVantage.Daily
+      AlphaVantage.Fetches
       AlphaVantage.MarketTypes
       AlphaVantage.Parsing.Search
       AlphaVantage.Search
       AlphaVantage.Types
       AlphaVantage.Urls
       Config.Config
+      QueryEnv.QueryEnv
       Utils.LoadEnv
       Utils.Urls
   other-modules:
