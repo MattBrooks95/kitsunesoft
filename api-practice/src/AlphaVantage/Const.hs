@@ -9,6 +9,8 @@ module AlphaVantage.Const (
     , queryUrlPath
     , keywordsQueryP
     , searchBestMatches
+    , symbolDaily
+    , symbolQueryP
     ) where
 
 functionQueryP :: String
@@ -32,8 +34,14 @@ apiKeyQueryP = "apikey"
 queryUrlPath :: String
 queryUrlPath = "query"
 
+symbolDaily :: String
+symbolDaily = "TIME_SERIES_DAILY"
+
 keywordsQueryP :: String
 keywordsQueryP = "keywords"
 
 searchBestMatches :: String
 searchBestMatches = "bestMatches"
+
+symbolQueryP :: String
+symbolQueryP = "symbol"

@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveAnyClass #-}
 module AlphaVantage.Daily (
     DailyResult
     ) where
@@ -17,11 +18,12 @@ import Data.Aeson.Types (
 
 
 import AlphaVantage.Types (OutputSize)
+import GHC.Generics (Generic)
 
 data DailyResult = DailyResult {
     dailyMetaData :: MetaData
     , dailyTimeSeries :: [TimeSeries]
-    }
+    } deriving (Generic, FromJSON, Show)
 
 data MetaData = MetaData {
     mdInformation :: T.Text
@@ -29,7 +31,7 @@ data MetaData = MetaData {
     , mdLastRefreshed :: T.Text
     , mdOutputSize :: OutputSize
     , mdTimeZone :: T.Text
-    }
+    } deriving (Show)
 
 instance FromJSON MetaData where
     parseJSON (Object v) = MetaData
@@ -54,7 +56,7 @@ data TimeSeries = TimeSeries {
     , tsLow :: Double
     , tsClose :: Double
     , tsVolume :: Int
-    }
+    } deriving Show
 
 instance FromJSON TimeSeries where
     parseJSON (Object v) = TimeSeries
