@@ -30,6 +30,7 @@ library
       AlphaVantage.Fetches
       AlphaVantage.MarketTypes
       AlphaVantage.Parsing.Search
+      AlphaVantage.Parsing.Utils
       AlphaVantage.Search
       AlphaVantage.Types
       AlphaVantage.Urls

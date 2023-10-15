@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveGeneric #-}
 module AlphaVantage.Daily (
     DailyResult
     ) where
 
+import qualified Data.Attoparsec.ByteString as AP
 import qualified Data.Text as T
 import Data.Aeson (
     FromJSON
@@ -16,16 +16,24 @@ import Data.Aeson.Types (
     , typeMismatch
     )
 
+import qualified Data.Map as M
+
 
 import AlphaVantage.Types (OutputSize)
-import GHC.Generics (Generic)
+import AlphaVantage.Parsing.Utils (StrDouble, StrInt)
 
 data DailyResult = DailyResult {
     dailyMetaData :: MetaData
-    , dailyTimeSeries :: [TimeSeries]
-    } deriving (Generic, Show)
+    , dailyTimeSeries :: M.Map T.Text TimeSeries
+    } deriving (Show)
 
 instance FromJSON DailyResult where
+    parseJSON (Object v) = DailyResult
+        <$> v .: "Meta Data"
+        <*> v .: "Time Series (Daily)"
+    parseJSON invalid =
+        prependFailure "parsing DailyResult failed"
+            (typeMismatch "Object" invalid)
 
 data MetaData = MetaData {
     mdInformation :: T.Text
@@ -53,11 +61,11 @@ data will get assigned to the wrong attribute. You need to learn how
 to actually use the Record's setter fields
 -}
 data TimeSeries = TimeSeries {
-    tsOpen :: Double
-    , tsHigh :: Double
-    , tsLow :: Double
-    , tsClose :: Double
-    , tsVolume :: Int
+    tsOpen :: StrDouble
+    , tsHigh :: StrDouble
+    , tsLow :: StrDouble
+    , tsClose :: StrDouble
+    , tsVolume :: StrInt
     } deriving Show
 
 instance FromJSON TimeSeries where
@@ -68,6 +76,9 @@ instance FromJSON TimeSeries where
         <*> v .: "3. low"
         <*> v .: "4. close"
         <*> v .: "5. volume"
+    --parseJSON (Object v) = do
+    --    open <- v .: "1. open"
+    --    undefined
     parseJSON invalid =
         prependFailure "parsing TimeSeries failed"
             (typeMismatch "Object" invalid)
