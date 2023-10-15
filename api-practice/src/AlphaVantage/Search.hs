@@ -32,15 +32,15 @@ import qualified Data.Text as T
 import Data.Aeson.Types (prependFailure, typeMismatch)
 
 data SearchResult = SearchResult {
-        searchSymbol :: T.Text
-        , searchName :: T.Text
-        , searchItemType :: MarketItem
-        , searchRegion :: T.Text
-        , searchMarketopen :: T.Text
-        , searchMarketClose :: T.Text
-        , searchTimezone :: T.Text
-        , searchCurrency :: T.Text
-        , searchMatchScore :: T.Text
+    searchSymbol :: T.Text
+    , searchName :: T.Text
+    , searchItemType :: MarketItem
+    , searchRegion :: T.Text
+    , searchMarketopen :: T.Text
+    , searchMarketClose :: T.Text
+    , searchTimezone :: T.Text
+    , searchCurrency :: T.Text
+    , searchMatchScore :: T.Text
     } deriving (Show)
 
 instance FromJSON SearchResult where
@@ -54,8 +54,6 @@ instance FromJSON SearchResult where
         <*> v .: "7. timezone"
         <*> v .: "8. currency"
         <*> v .: "9. matchScore"
-
-        
     parseJSON invalid =
         prependFailure "parsing SearchResult failed"
             (typeMismatch "Object" invalid)

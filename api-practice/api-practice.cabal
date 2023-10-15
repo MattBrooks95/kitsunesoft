@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       AlphaVantage.Const
+      AlphaVantage.Daily
       AlphaVantage.MarketTypes
       AlphaVantage.Parsing.Search
       AlphaVantage.Search
