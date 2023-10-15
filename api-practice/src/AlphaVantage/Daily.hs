@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 module AlphaVantage.Daily (
-    DailyResult
+    DailyResult(..)
     ) where
 
 import qualified Data.Attoparsec.ByteString as AP
