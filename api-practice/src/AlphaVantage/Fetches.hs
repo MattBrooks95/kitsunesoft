@@ -1,5 +1,6 @@
 module AlphaVantage.Fetches (
     searchTicker
+    , getDaily
     ) where
 
 import qualified AlphaVantage.Urls as AVU
@@ -18,7 +19,7 @@ import AlphaVantage.Daily (DailyResult)
 searchTicker :: (MonadIO m, MonadThrow m) => String -> ReaderT QueryEnv m (Either String SearchResults)
 searchTicker ticker = do
     QueryEnv { qeApiKey=apiKey, qeHttp=manager } <- ask
-    let searchUrl = AVU.search ticker
+    let searchUrl = AVU.search ticker (show apiKey)
     liftIO $ print $ "searchUrl:" ++ U.exportURL searchUrl
     request <- parseRequest (U.exportURL searchUrl)
     response <- liftIO $ httpLbs request manager
@@ -27,8 +28,8 @@ searchTicker ticker = do
 getDaily :: (MonadIO m, MonadThrow m) => String -> ReaderT QueryEnv m (Either String DailyResult)
 getDaily ticker = do
     QueryEnv { qeApiKey=apiKey, qeHttp=manager } <- ask
-    let dailyUrl = AVU.daily ticker
+    let dailyUrl = AVU.daily ticker (show apiKey)
         url = U.exportURL dailyUrl
-    request <- parseRequst (U.exportURL dailyUrl)
+    request <- parseRequest url
     response <- liftIO $ httpLbs request manager
     return $ eitherDecode (responseBody response)

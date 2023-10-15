@@ -23,15 +23,6 @@ import Network.HTTP.Types.Status (statusCode)
 import qualified Network.URL as U
 
 import qualified AlphaVantage.Urls as AVU
-import Data.Aeson (decode, eitherDecode)
-import AlphaVantage.Search (
-    SearchResults (bestMatches)
-    , SearchResult(..)
-    )
-import Data.Text (intercalate)
-import Control.Monad.IO.Class (MonadIO)
-import Control.Monad.Catch (MonadThrow, MonadCatch (catch))
-import Config.Config (Config(..))
 import QueryEnv.QueryEnv (QueryEnv (..))
 import AlphaVantage.Fetches (searchTicker)
 
@@ -95,10 +86,10 @@ main = do
     print responseContents
     tryToRequest <- runReaderT (searchTicker testTicker) queryEnv
     parseResult <-
-            case tryToRequest of
-                Left err -> die err
-                Right asObject -> do
-                    print "object decode successful"
-                    print asObject
-                    return asObject
+        case tryToRequest of
+            Left err -> die err
+            Right asObject -> do
+                print "object decode successful"
+                print asObject
+                return asObject
     print parseResult

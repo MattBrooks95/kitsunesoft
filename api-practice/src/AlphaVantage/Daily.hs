@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 module AlphaVantage.Daily (
     DailyResult
     ) where
@@ -23,7 +23,9 @@ import GHC.Generics (Generic)
 data DailyResult = DailyResult {
     dailyMetaData :: MetaData
     , dailyTimeSeries :: [TimeSeries]
-    } deriving (Generic, FromJSON, Show)
+    } deriving (Generic, Show)
+
+instance FromJSON DailyResult where
 
 data MetaData = MetaData {
     mdInformation :: T.Text
