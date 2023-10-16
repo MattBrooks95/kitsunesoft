@@ -28,8 +28,12 @@ import qualified Network.URL as U
 
 import qualified AlphaVantage.Urls as AVU
 import QueryEnv.QueryEnv (QueryEnv (..))
-import DataConfig.DataConfig (DataConfig, getDataConfig, dcDaily, DailyConfig (..))
-import Data.Either (isLeft)
+import DataConfig.DataConfig (DataConfig(..), getDataConfig, dcDaily, tickers)
+import Data.Either (
+    isLeft
+    , rights
+    , lefts
+    )
 import Data.Either.Extra (fromRight')
 import AlphaVantage.Fetches (getDaily)
 
@@ -92,5 +96,7 @@ main = do
     let dataConfig = fromRight' _dataConfig
     print dataConfig
     dailyResults <- mapM (\ticker -> runReaderT (getDaily ticker) queryEnv) ((tickers . dcDaily) dataConfig)
-    print dailyResults
+    let succeeded = rights dailyResults
+        failed = lefts dailyResults
+    print $ "succeeded:" <> (show . length) succeeded <> " failed:" <> (show . length) failed
 
