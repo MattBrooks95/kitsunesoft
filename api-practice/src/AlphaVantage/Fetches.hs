@@ -32,4 +32,6 @@ getDaily ticker = do
         url = U.exportURL dailyUrl
     request <- parseRequest url
     response <- liftIO $ httpLbs request manager
-    return $ eitherDecode (responseBody response)
+    case eitherDecode (responseBody response) of
+        Left err -> return $ Left $ "error parsing ticker:" <> ticker <> " " <> err
+        Right res -> return $ Right res

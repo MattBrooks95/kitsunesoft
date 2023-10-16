@@ -1,6 +1,8 @@
 module AlphaVantage.Parsing.Utils (
     StrDouble
     , StrInt
+    , dubVal
+    , iVal
     ) where
 import Text.Read (readEither)
 
@@ -28,6 +30,8 @@ instance FromJSON StrDouble where
     parseJSON invalid = undefined
         prependFailure "parsing double from a string"
             (typeMismatch "String" invalid)
+dubVal :: StrDouble -> Double
+dubVal (StrDouble value) = value
 
 newtype StrInt = StrInt Int
     deriving (Show, Eq, Ord)
@@ -41,3 +45,6 @@ instance FromJSON StrInt where
     parseJSON invalid = undefined
         prependFailure "parsing double from a string"
             (typeMismatch "String" invalid)
+
+iVal :: StrInt -> Int
+iVal (StrInt num) = num

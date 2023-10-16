@@ -36,6 +36,8 @@ import Data.Either (
     )
 import Data.Either.Extra (fromRight')
 import AlphaVantage.Fetches (getDaily)
+import AlphaVantage.Daily (DailyResult)
+import TimeSeries (highAverage)
 
 -- helper that runs the IO action if the requisite Either is a Right
 -- I feel like there's probably some helper in the standard lib for this
@@ -84,6 +86,12 @@ initialize = do
 dataConfigLocation :: FilePath
 dataConfigLocation = "config" </> "data.json"
 
+processSuccess :: DailyResult -> String
+processSuccess dr = undefined
+    where
+        highAvg = highAverage dr
+        lowAvg = lowAverage dr
+
 main :: IO ()
 main = do
     _queryEnvEither <- initialize
@@ -99,4 +107,5 @@ main = do
     let succeeded = rights dailyResults
         failed = lefts dailyResults
     print $ "succeeded:" <> (show . length) succeeded <> " failed:" <> (show . length) failed
+    mapM_ print failed
 
