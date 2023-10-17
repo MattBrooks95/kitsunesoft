@@ -20,7 +20,6 @@ searchTicker :: (MonadIO m, MonadThrow m) => String -> ReaderT QueryEnv m (Eithe
 searchTicker ticker = do
     QueryEnv { qeApiKey=apiKey, qeHttp=manager } <- ask
     let searchUrl = AVU.search ticker (show apiKey)
-    liftIO $ print $ "searchUrl:" ++ U.exportURL searchUrl
     request <- parseRequest (U.exportURL searchUrl)
     response <- liftIO $ httpLbs request manager
     return $ eitherDecode (responseBody response)

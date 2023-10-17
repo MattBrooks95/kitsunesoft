@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      AlphaVantage.Analysis.TimeSeries
       AlphaVantage.Const
       AlphaVantage.Daily
       AlphaVantage.Fetches

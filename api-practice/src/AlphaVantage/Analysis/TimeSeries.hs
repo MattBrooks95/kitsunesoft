@@ -1,4 +1,4 @@
-module TimeSeries (
+module AlphaVantage.Analysis.TimeSeries (
     highAverage
     , lowAverage
     ) where
